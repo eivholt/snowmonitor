@@ -35,7 +35,6 @@
 #include "stm32_lpm.h"
 #include "adc_if.h"
 #include "sys_conf.h"
-#include "CayenneLpp.h"
 #include "sys_sensors.h"
 
 /* USER CODE BEGIN Includes */
@@ -422,22 +421,18 @@ static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
   /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
-  //uint16_t pressure = 0;
-  //int16_t temperature = 0;
-  //sensor_t sensor_data;
+  uint16_t pressure = 0;
+  int16_t temperature = 0;
+  sensor_t sensor_data;
   float aht20_hum = 0.0, aht20_temp = 100.0;
   uint16_t pms1=0, pms25=0, pms10=0;
   UTIL_TIMER_Time_t nextTxIn = 0;
 
-#ifdef CAYENNE_LPP
-  uint8_t channel = 0;
-#else
   uint16_t humidity = 0;
   uint32_t i = 0;
   int32_t latitude = 0;
   int32_t longitude = 0;
   uint16_t altitudeGps = 0;
-#endif /* CAYENNE_LPP */
 
   if (initAHT20())
   {
@@ -458,33 +453,11 @@ static void SendTxData(void)
 	  pms10 = 0;
   }
 
-  //EnvSensors_Read(&sensor_data);
-  //temperature = (SYS_GetTemperatureLevel() >> 8);
-  //pressure    = (uint16_t)(sensor_data.pressure * 100 / 10);      /* in hPa / 10 */
+  EnvSensors_Read(&sensor_data);
+  temperature = (SYS_GetTemperatureLevel() >> 8);
+  pressure    = (uint16_t)(sensor_data.pressure * 100 / 10);      /* in hPa / 10 */
 
   AppData.Port = LORAWAN_USER_APP_PORT;
-
-#ifdef CAYENNE_LPP
-  CayenneLppReset();
-  //CayenneLppAddBarometricPressure(channel++, pressure);
-  //CayenneLppAddTemperature(channel++, temperature);
-  //CayenneLppAddRelativeHumidity(channel++, (uint16_t)(sensor_data.humidity));
-  CayenneLppAddTemperatureFloat(channel++, aht20_temp);
-  CayenneLppAddRelativeHumidityFloat(channel++, aht20_hum);
-  CayenneLppAddLuminosity(channel++, pms1);
-  CayenneLppAddLuminosity(channel++, pms25);
-  CayenneLppAddLuminosity(channel++, pms10);
-
-  if ((LmHandlerParams.ActiveRegion != LORAMAC_REGION_US915) && (LmHandlerParams.ActiveRegion != LORAMAC_REGION_AU915)
-	  && (LmHandlerParams.ActiveRegion != LORAMAC_REGION_AS923))
-  {
-	CayenneLppAddDigitalInput(channel++, GetBatteryLevel());
-	//CayenneLppAddDigitalOutput(channel++, AppLedStateOn);
-  }
-
-  CayenneLppCopy(AppData.Buffer);
-  AppData.BufferSize = CayenneLppGetSize();
-#else  /* not CAYENNE_LPP */
   humidity    = (uint16_t)(sensor_data.humidity * 10);            /* in %*10     */
 
   AppData.Buffer[i++] = AppLedStateOn;
@@ -519,7 +492,6 @@ static void SendTxData(void)
   }
 
   AppData.BufferSize = i;
-#endif /* CAYENNE_LPP */
 
   if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, &nextTxIn, false))
   {
