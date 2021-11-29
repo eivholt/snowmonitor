@@ -235,7 +235,14 @@ void LoRaWAN_Init(void)
 {
   /* USER CODE BEGIN LoRaWAN_Init_1 */
   /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
-  SYS_LED_Init(SYS_LED_BLUE);
+
+	#if defined (STATUS_LED_ENABLE) && (STATUS_LED_ENABLE == 1)
+	  /* Enable status LEDs */
+		SYS_LED_Init(SYS_LED_BLUE);
+	#elif !defined (STATUS_LED_ENABLE)
+	#error STATUS_LED_ENABLE not defined
+	#endif /* STATUS_LED_ENABLE */
+
 
   /* Get LoRa APP version*/
   APP_LOG(TS_OFF, VLEVEL_M, "APP_VERSION:        V%X.%X.%X\r\n",
@@ -255,12 +262,18 @@ void LoRaWAN_Init(void)
           (uint8_t)(__SUBGHZ_PHY_VERSION >> __APP_VERSION_SUB1_SHIFT),
           (uint8_t)(__SUBGHZ_PHY_VERSION >> __APP_VERSION_SUB2_SHIFT));
 
-  UTIL_TIMER_Create(&TxLedTimer, 0xFFFFFFFFU, UTIL_TIMER_ONESHOT, OnTxTimerLedEvent, NULL);
-  UTIL_TIMER_Create(&RxLedTimer, 0xFFFFFFFFU, UTIL_TIMER_ONESHOT, OnRxTimerLedEvent, NULL);
-  UTIL_TIMER_Create(&JoinLedTimer, 0xFFFFFFFFU, UTIL_TIMER_PERIODIC, OnJoinTimerLedEvent, NULL);
-  UTIL_TIMER_SetPeriod(&TxLedTimer, 500);
-  UTIL_TIMER_SetPeriod(&RxLedTimer, 500);
-  UTIL_TIMER_SetPeriod(&JoinLedTimer, 500);
+  #if defined (STATUS_LED_ENABLE) && (STATUS_LED_ENABLE == 1)
+	  /* Enable status LEDs */
+  	  UTIL_TIMER_Create(&TxLedTimer, 0xFFFFFFFFU, UTIL_TIMER_ONESHOT, OnTxTimerLedEvent, NULL);
+  	  UTIL_TIMER_Create(&RxLedTimer, 0xFFFFFFFFU, UTIL_TIMER_ONESHOT, OnRxTimerLedEvent, NULL);
+	  UTIL_TIMER_Create(&JoinLedTimer, 0xFFFFFFFFU, UTIL_TIMER_PERIODIC, OnJoinTimerLedEvent, NULL);
+	  UTIL_TIMER_SetPeriod(&TxLedTimer, 500);
+	  UTIL_TIMER_SetPeriod(&RxLedTimer, 500);
+	  UTIL_TIMER_SetPeriod(&JoinLedTimer, 500);
+  #elif !defined (STATUS_LED_ENABLE)
+  #error STATUS_LED_ENABLE not defined
+  #endif /* STATUS_LED_ENABLE */
+
 
   /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
   /* USER CODE END LoRaWAN_Init_1 */
@@ -278,7 +291,13 @@ void LoRaWAN_Init(void)
   /* USER CODE BEGIN LoRaWAN_Init_2 */
   /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
 
-  UTIL_TIMER_Start(&JoinLedTimer);
+#if defined (STATUS_LED_ENABLE) && (STATUS_LED_ENABLE == 1)
+	  /* Enable join status LED */
+  	  UTIL_TIMER_Start(&JoinLedTimer);
+  #elif !defined (STATUS_LED_ENABLE)
+  #error STATUS_LED_ENABLE not defined
+  #endif /* STATUS_LED_ENABLE */
+
 
   /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
   /* USER CODE END LoRaWAN_Init_2 */
@@ -345,8 +364,15 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 
   if ((appData != NULL) && (params != NULL))
   {
-	SYS_LED_On(SYS_LED_BLUE) ;
-	UTIL_TIMER_Start(&RxLedTimer);
+	#if defined (STATUS_LED_ENABLE) && (STATUS_LED_ENABLE == 1)
+	  /* Enable Rx status LED */
+	  SYS_LED_On(SYS_LED_BLUE);
+	  UTIL_TIMER_Start(&RxLedTimer);
+	#elif !defined (STATUS_LED_ENABLE)
+	#error STATUS_LED_ENABLE not defined
+	#endif /* STATUS_LED_ENABLE */
+
+
 
 	static const char *slotStrings[] = { "1", "2", "C", "C Multicast", "B Ping-Slot", "B Multicast Ping-Slot" };
 
@@ -493,7 +519,7 @@ static void SendTxData(void)
 
   AppData.BufferSize = i;
 
-  if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, &nextTxIn, false))
+  if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAMAC_HANDLER_UNCONFIRMED_MSG, &nextTxIn, false))
   {
 	APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST\r\n");
   }
