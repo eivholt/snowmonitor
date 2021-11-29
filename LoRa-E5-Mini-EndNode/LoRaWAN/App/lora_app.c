@@ -35,10 +35,10 @@
 #include "stm32_lpm.h"
 #include "adc_if.h"
 #include "sys_conf.h"
+#include "CayenneLpp.h"
 #include "sys_sensors.h"
 
 /* USER CODE BEGIN Includes */
-#include "i2c.h"
 #include "usart.h"
 /* USER CODE END Includes */
 
@@ -460,10 +460,10 @@ static void SendTxData(void)
   int32_t longitude = 0;
   uint16_t altitudeGps = 0;
 
-  if (initAHT20())
-  {
-	  readAHT20(&aht20_hum, &aht20_temp);
-  }
+//  if (initAHT20())
+//  {
+//	  readAHT20(&aht20_hum, &aht20_temp);
+//  }
 
   APP_LOG(TS_OFF, VLEVEL_M, "\r\n UART: NOW READ\r\n");
 

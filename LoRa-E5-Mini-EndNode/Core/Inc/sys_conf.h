@@ -71,13 +71,13 @@ extern "C" {
   */
 #define LOW_POWER_DISABLE           0
 
+/* USER CODE BEGIN EC */
+
 /**
   * @brief Disable Status LEDS
   * @note  0: Enable status LEDs, 1: Disable status LEDs for low power.
   */
 #define STATUS_LED_ENABLE           0
-
-/* USER CODE BEGIN EC */
 
 /* USER CODE END EC */
 

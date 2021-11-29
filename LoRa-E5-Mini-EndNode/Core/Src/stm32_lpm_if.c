@@ -27,7 +27,6 @@
 
 /* USER CODE BEGIN Includes */
   /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
-#include "i2c.h"
 #include "sys_app.h"
   /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 /* USER CODE END Includes */
@@ -130,7 +129,7 @@ void PWR_ExitStopMode(void)
   /* USER CODE BEGIN ExitStopMode_2 */
   /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
   // resume I2C & USART2 after stop mode; maybe this is more than necessary, see for example vcom_Resume()
-  MX_I2C2_Init();
+  // MX_I2C2_Init();
   //MX_USART2_UART_Init();
 //  if (initPMS()) {
 //	  APP_LOG(TS_OFF, VLEVEL_M, "\r\n UART: REINIT OK\r\n");
