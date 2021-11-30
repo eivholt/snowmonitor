@@ -45,6 +45,7 @@ extern "C" {
 #include "stm32wlxx_nucleo.h"
 #include "stm32wlxx_nucleo_radio.h"
 #endif /* defined(USE_BSP_DRIVER) */
+#include "board_resources.h"
 
 /* USER CODE BEGIN include */
 
