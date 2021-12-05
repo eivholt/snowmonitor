@@ -40,6 +40,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "usart.h"
+#include "board_resources.h"
 /* USER CODE END Includes */
 
 /* External variables ---------------------------------------------------------*/
