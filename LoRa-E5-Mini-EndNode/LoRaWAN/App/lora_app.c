@@ -457,10 +457,7 @@ static void SendTxData(void)
 
   uint16_t humidity = 0;
   uint32_t i = 0;
-  int32_t latitude = 0;
-  int32_t longitude = 0;
-  uint16_t altitudeGps = 0;
-
+  HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_SET);
 //  if (initAHT20())
 //  {
 //	  readAHT20(&aht20_hum, &aht20_temp);
@@ -494,29 +491,7 @@ static void SendTxData(void)
   AppData.Buffer[i++] = (uint8_t)((humidity >> 8) & 0xFF);
   AppData.Buffer[i++] = (uint8_t)(humidity & 0xFF);
 
-  if ((LmHandlerParams.ActiveRegion == LORAMAC_REGION_US915) || (LmHandlerParams.ActiveRegion == LORAMAC_REGION_AU915)
-	  || (LmHandlerParams.ActiveRegion == LORAMAC_REGION_AS923))
-  {
-	AppData.Buffer[i++] = 0;
-	AppData.Buffer[i++] = 0;
-	AppData.Buffer[i++] = 0;
-	AppData.Buffer[i++] = 0;
-  }
-  else
-  {
-	latitude = sensor_data.latitude;
-	longitude = sensor_data.longitude;
-
-	AppData.Buffer[i++] = GetBatteryLevel();        /* 1 (very low) to 254 (fully charged) */
-	AppData.Buffer[i++] = (uint8_t)((latitude >> 16) & 0xFF);
-	AppData.Buffer[i++] = (uint8_t)((latitude >> 8) & 0xFF);
-	AppData.Buffer[i++] = (uint8_t)(latitude & 0xFF);
-	AppData.Buffer[i++] = (uint8_t)((longitude >> 16) & 0xFF);
-	AppData.Buffer[i++] = (uint8_t)((longitude >> 8) & 0xFF);
-	AppData.Buffer[i++] = (uint8_t)(longitude & 0xFF);
-	AppData.Buffer[i++] = (uint8_t)((altitudeGps >> 8) & 0xFF);
-	AppData.Buffer[i++] = (uint8_t)(altitudeGps & 0xFF);
-  }
+  AppData.Buffer[i++] = GetBatteryLevel();        /* 1 (very low) to 254 (fully charged) */
 
   AppData.BufferSize = i;
 
@@ -528,7 +503,7 @@ static void SendTxData(void)
   {
 	APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d second(s)\r\n", (nextTxIn / 1000));
   }
-
+  HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_RESET);
   /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
   /* USER CODE END SendTxData_1 */
 }
