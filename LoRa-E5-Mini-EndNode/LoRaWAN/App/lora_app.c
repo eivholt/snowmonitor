@@ -457,7 +457,7 @@ static void SendTxData(void)
 
   uint16_t humidity = 0;
   uint32_t i = 0;
-  HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_SET);
+
 //  if (initAHT20())
 //  {
 //	  readAHT20(&aht20_hum, &aht20_temp);
@@ -465,8 +465,8 @@ static void SendTxData(void)
 
   APP_LOG(TS_OFF, VLEVEL_M, "\r\n UART: NOW READ\r\n");
 
-  if (readPMS()) {
-	  APP_LOG(TS_OFF, VLEVEL_M, "\r\n UART: read ok\r\n");
+  if (readUltraSonicDistance()) {
+	  APP_LOG(TS_ON, VLEVEL_M, "\r\n UART: read ok\r\n");
 	  pms1 = getDataBin(0);
 	  pms25 = getDataBin(1);
 	  pms10 = getDataBin(2);
@@ -503,7 +503,7 @@ static void SendTxData(void)
   {
 	APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d second(s)\r\n", (nextTxIn / 1000));
   }
-  HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_RESET);
+
   /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
   /* USER CODE END SendTxData_1 */
 }

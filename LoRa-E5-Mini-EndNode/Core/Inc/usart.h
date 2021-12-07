@@ -49,7 +49,7 @@ uint16_t buff2word(uint8_t n);
 bool checkBuffer(size_t bufferLen);
 void cleanRX();
 bool initPMS();
-bool readPMS();
+bool readUltraSonicDistance();
 void decodeData();
 uint16_t getDataBin(uint8_t n);
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */

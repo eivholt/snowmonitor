@@ -18,6 +18,8 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include "sys_app.h"
+#include "utilities_def.h"
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
@@ -26,7 +28,7 @@
 uint8_t cfg[PMS_MSG_LEN] = {0x42, 0x4D, 0xE1, 0x00, 0x00, 0x01, 0x70};
 uint8_t trg[PMS_MSG_LEN] = {0x42, 0x4D, 0xE2, 0x00, 0x00, 0x01, 0x71};
 
-#define PMS_BUFFER_LEN 32
+#define PMS_BUFFER_LEN 128
 uint8_t buffer[PMS_BUFFER_LEN];
 
 #define PMS_HEADER_LEN 4
@@ -316,16 +318,17 @@ bool initPMS()
 	return true;
 }
 
-bool readPMS()
+bool readUltraSonicDistance()
 {
 	HAL_StatusTypeDef ret;
 
-	if (HAL_OK !=  HAL_UART_Transmit(&huart2, trg, PMS_MSG_LEN, 300))
-	{
-		pms_data[0]=2;
-		return false;
-	}
-    ret =  HAL_UART_Receive(&huart2, &buffer[0], 32, 2000);
+	HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_SET);
+	//HAL_Delay(74);
+
+    ret =  HAL_UART_Receive(&huart2, &buffer[0], 94, 1000);
+    APP_LOG(TS_ON, VLEVEL_M, "\r\nFrom MB7374 = %s\r\n", buffer);
+
+    HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_RESET);
 	if (HAL_OK !=  ret)
 	{
 		pms_data[0]=3;
