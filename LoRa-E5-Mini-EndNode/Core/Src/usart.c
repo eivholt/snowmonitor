@@ -18,21 +18,24 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "sys_app.h"
-#include "utilities_def.h"
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
 /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
+#include <stdlib.h>
+#include <string.h>
+#include "sys_app.h"
+#include "utilities_def.h"
+
 #define DISTANCE_MSG_LEN 6 // Number of characters per reading (Including trailing /r)
 #define SENSOR_MSG_LEN 88 // Number of chars before first reading
 #define SENSOR_BOOT_TIME_MS 15+4 // Time from device drive till boot data output, pluss margin
 
-#define PMS_BUFFER_LEN 128
+#define PMS_BUFFER_LEN SENSOR_MSG_LEN+DISTANCE_MSG_LEN
 uint8_t buffer[PMS_BUFFER_LEN];
 
 #define PMS_HEADER_LEN 4
-uint16_t pms_data[3];
+uint16_t distance;
 
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 /* USER CODE END 0 */
@@ -278,27 +281,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
 /* USER CODE BEGIN 1 */
 /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
-uint16_t buff2word(uint8_t n)
-{
-	return (buffer[n] << 8) | buffer[n+1];
-}
-bool checkBuffer(size_t bufferLen)
-{
-	uint16_t cksum = buff2word(bufferLen - 2);
-	for (uint8_t n=0; n < bufferLen -2; n++)
-	{
-		cksum -= buffer[n];
-	}
-	return (cksum == 0);
-}
-void cleanRX() {
-	uint8_t one_byte;
-	uint8_t n=0;
-	while (HAL_OK == HAL_UART_Receive(&huart2, &one_byte,1,100)) {
-		n++;
-	}
-	return;
-}
 
 bool readUltraSonicDistance()
 {
@@ -306,45 +288,27 @@ bool readUltraSonicDistance()
 
 	HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_SET);
 	//HAL_Delay(290); //Attempt to delay reading to after sensor version info.
-	ret =  HAL_UART_Receive(&huart2, &buffer[0], SENSOR_MSG_LEN+DISTANCE_MSG_LEN, 1000);
+	ret =  HAL_UART_Receive(&huart2, &buffer[0], PMS_BUFFER_LEN, 350);
 	HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_RESET);
 
-    APP_LOG(TS_ON, VLEVEL_M, "\r\nFrom MB7374 = %s\r\n", buffer);
-
+    //APP_LOG(TS_ON, VLEVEL_M, "\r\nFrom MB7374: %s\r\n", buffer);
 
 	if (HAL_OK !=  ret)
 	{
-		pms_data[0]=3;
+		distance=0;
 		return false;
 	}
-	if (buff2word(0) != 0x424D) {
-		pms_data[0]=4;
-		return false;
-	}
-	size_t bodyLen = buff2word(2);
-	if (bodyLen != 28) {
-		pms_data[0]=5;
-		return false;
-	}
-	if (!checkBuffer(32))
-	{
-		pms_data[0]=7;
-		return false;
-	}
-	pms_data[0]=0;
-	decodeData();
+
+	char distance_chars[4];
+	UTIL_MEM_cpy_8(distance_chars, &buffer[SENSOR_MSG_LEN+1], 4 * sizeof(uint8_t) );
+	distance = strtoul(distance_chars, NULL, 10);
+	APP_LOG(TS_OFF, VLEVEL_M, "\r\nDistance: %d\r\n", distance);
 	return true;
 }
-void decodeData() {
-	uint8_t bin, n;
-	for (bin = 0, n= 4; bin < 3; bin ++, n +=2)
-	{
-		pms_data[bin] = buff2word(n);
-	}
-}
-uint16_t getDataBin(uint8_t n)
+
+uint16_t getDataBin()
 {
-	return pms_data[n];
+	return distance;
 }
 
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */

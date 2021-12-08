@@ -45,13 +45,8 @@ void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
-uint16_t buff2word(uint8_t n);
-bool checkBuffer(size_t bufferLen);
-void cleanRX();
-bool initPMS();
 bool readUltraSonicDistance();
-void decodeData();
-uint16_t getDataBin(uint8_t n);
+uint16_t getDataBin();
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 /* USER CODE END Prototypes */
 

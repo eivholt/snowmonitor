@@ -467,12 +467,10 @@ static void SendTxData(void)
 
   if (readUltraSonicDistance()) {
 	  APP_LOG(TS_ON, VLEVEL_M, "\r\n UART: read ok\r\n");
-	  pms1 = getDataBin(0);
-	  pms25 = getDataBin(1);
-	  pms10 = getDataBin(2);
+	  pms1 = getDataBin();
   } else {
 	  APP_LOG(TS_OFF, VLEVEL_M, "\r\n UART: read failed\r\n");
-	  pms1 = getDataBin(0);
+	  pms1 = getDataBin();
 	  pms25 = 0;
 	  pms10 = 0;
   }
