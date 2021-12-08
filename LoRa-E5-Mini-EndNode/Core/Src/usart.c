@@ -24,9 +24,9 @@
 
 /* USER CODE BEGIN 0 */
 /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
-#define PMS_MSG_LEN 7
-uint8_t cfg[PMS_MSG_LEN] = {0x42, 0x4D, 0xE1, 0x00, 0x00, 0x01, 0x70};
-uint8_t trg[PMS_MSG_LEN] = {0x42, 0x4D, 0xE2, 0x00, 0x00, 0x01, 0x71};
+#define DISTANCE_MSG_LEN 6 // Number of characters per reading (Including trailing /r)
+#define SENSOR_MSG_LEN 88 // Number of chars before first reading
+#define SENSOR_BOOT_TIME_MS 15+4 // Time from device drive till boot data output, pluss margin
 
 #define PMS_BUFFER_LEN 128
 uint8_t buffer[PMS_BUFFER_LEN];
@@ -299,36 +299,19 @@ void cleanRX() {
 	}
 	return;
 }
-bool initPMS()
-{
-	if (HAL_OK !=  HAL_UART_Transmit(&huart2, cfg, PMS_MSG_LEN, 300))
-	{
-		pms_data[0]=1;
-		return false;
-	}
-	// device sends a 8 byte reply, we just ignore it
-	if (HAL_OK !=  HAL_UART_Receive(&huart2, &buffer[0], 8, 1000))
-	{
-		pms_data[0]=99;
-		return false;
-	}
-	// don't know if this is necessary
-	//HAL_Delay(2000);
-	pms_data[0]=0;
-	return true;
-}
 
 bool readUltraSonicDistance()
 {
 	HAL_StatusTypeDef ret;
 
 	HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_SET);
-	//HAL_Delay(74);
+	//HAL_Delay(290); //Attempt to delay reading to after sensor version info.
+	ret =  HAL_UART_Receive(&huart2, &buffer[0], SENSOR_MSG_LEN+DISTANCE_MSG_LEN, 1000);
+	HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_RESET);
 
-    ret =  HAL_UART_Receive(&huart2, &buffer[0], 94, 1000);
     APP_LOG(TS_ON, VLEVEL_M, "\r\nFrom MB7374 = %s\r\n", buffer);
 
-    HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_RESET);
+
 	if (HAL_OK !=  ret)
 	{
 		pms_data[0]=3;
