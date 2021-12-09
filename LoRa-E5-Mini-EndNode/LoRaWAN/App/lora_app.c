@@ -450,9 +450,7 @@ static void SendTxData(void)
   int16_t temperature = 0;
   uint16_t voltage = 0;
   UTIL_TIMER_Time_t nextTxIn = 0;
-
-  uint16_t humidity = 0;
-  uint8_t i = 0;
+  uint8_t bufferIndex = 0;
 
   APP_LOG(TS_ON, VLEVEL_M, "\r\n UART: NOW READ\r\n");
 
@@ -470,14 +468,14 @@ static void SendTxData(void)
 
   AppData.Port = LORAWAN_USER_APP_PORT;
   // Split measurements into bytes and prepare buffer.
-  AppData.Buffer[i++] = (uint8_t)((distance >> 8) & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)(distance & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)((temperature >> 8) & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)(temperature & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)((voltage >> 8) & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)(voltage & 0xFF);
+  AppData.Buffer[bufferIndex++] = (uint8_t)((distance >> 8) & 0xFF);
+  AppData.Buffer[bufferIndex++] = (uint8_t)(distance & 0xFF);
+  AppData.Buffer[bufferIndex++] = (uint8_t)((temperature >> 8) & 0xFF);
+  AppData.Buffer[bufferIndex++] = (uint8_t)(temperature & 0xFF);
+  AppData.Buffer[bufferIndex++] = (uint8_t)((voltage >> 8) & 0xFF);
+  AppData.Buffer[bufferIndex++] = (uint8_t)(voltage & 0xFF);
 
-  AppData.BufferSize = i;
+  AppData.BufferSize = bufferIndex;
 
   if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAMAC_HANDLER_CONFIRMED_MSG, &nextTxIn, false))
   {
