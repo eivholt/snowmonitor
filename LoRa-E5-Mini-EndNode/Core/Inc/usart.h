@@ -46,7 +46,7 @@ void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN Prototypes */
 /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
 bool readUltraSonicDistance();
-uint16_t getDataBin();
+uint16_t getLastReading();
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 /* USER CODE END Prototypes */
 

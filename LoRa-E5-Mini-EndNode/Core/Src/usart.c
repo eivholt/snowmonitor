@@ -28,11 +28,12 @@
 #include "utilities_def.h"
 
 #define DISTANCE_MSG_LEN 6 // Number of characters per reading (Including trailing /r)
+#define DISTANCE_CHARS_LEN 4 // Number of characters containing the distance digits
 #define SENSOR_MSG_LEN 88 // Number of chars before first reading
 #define SENSOR_BOOT_TIME_MS 15+4 // Time from device drive till boot data output, pluss margin
 
-#define PMS_BUFFER_LEN SENSOR_MSG_LEN+DISTANCE_MSG_LEN
-uint8_t buffer[PMS_BUFFER_LEN];
+#define SENSOR_BUFFER_LEN SENSOR_MSG_LEN+DISTANCE_MSG_LEN
+uint8_t buffer[SENSOR_BUFFER_LEN];
 
 #define PMS_HEADER_LEN 4
 uint16_t distance;
@@ -286,9 +287,12 @@ bool readUltraSonicDistance()
 {
 	HAL_StatusTypeDef ret;
 
+	// Power MB7374 by enabling power via Lora-E5-mini pin D0.
 	HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_SET);
 	//HAL_Delay(290); //Attempt to delay reading to after sensor version info.
-	ret =  HAL_UART_Receive(&huart2, &buffer[0], PMS_BUFFER_LEN, 350);
+	// Read TTL on Lora-E5-mini pin RX2, put boot info and first reading in buffer, timeout after 350 ms.
+	ret =  HAL_UART_Receive(&huart2, &buffer[0], SENSOR_BUFFER_LEN, 350);
+	// Power down MB7374
 	HAL_GPIO_WritePin(US_ENABLE_GPIO_Port, US_ENABLE_Pin, GPIO_PIN_RESET);
 
     //APP_LOG(TS_ON, VLEVEL_M, "\r\nFrom MB7374: %s\r\n", buffer);
@@ -299,14 +303,19 @@ bool readUltraSonicDistance()
 		return false;
 	}
 
-	char distance_chars[4];
+	// Boot info from MB7374 is followed by the first reading. Reading looks like "Rxxxx/r".
+	char distance_chars[DISTANCE_CHARS_LEN];
+	// Copy the digits (as ASCII-characters) from the first reading, they are always at the same position.
 	UTIL_MEM_cpy_8(distance_chars, &buffer[SENSOR_MSG_LEN+1], 4 * sizeof(uint8_t) );
+	// Convert distance string to unsigned long, decimal base.
 	distance = strtoul(distance_chars, NULL, 10);
+	memset(distance_chars, 0, DISTANCE_CHARS_LEN);
+	memset(buffer, 0, SENSOR_BUFFER_LEN);
 	APP_LOG(TS_OFF, VLEVEL_M, "\r\nDistance: %d\r\n", distance);
 	return true;
 }
 
-uint16_t getDataBin()
+uint16_t getLastReading()
 {
 	return distance;
 }
