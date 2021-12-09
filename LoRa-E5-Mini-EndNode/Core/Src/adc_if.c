@@ -128,7 +128,7 @@ int16_t SYS_GetTemperatureLevel(void)
                                                               LL_ADC_RESOLUTION_12B);
   }
 
-  APP_LOG(TS_ON, VLEVEL_L, "temp= %d\n\r", temperatureDegreeC);
+ APP_LOG(TS_ON, VLEVEL_L, "temp= %d\n\r", temperatureDegreeC);
 
   /* from int16 to q8.7*/
   temperatureDegreeC <<= 8;

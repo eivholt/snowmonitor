@@ -35,8 +35,6 @@
 #include "stm32_lpm.h"
 #include "adc_if.h"
 #include "sys_conf.h"
-#include "CayenneLpp.h"
-#include "sys_sensors.h"
 
 /* USER CODE BEGIN Includes */
 #include "usart.h"
@@ -448,52 +446,40 @@ static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
   /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
-  uint16_t pressure = 0;
+  uint16_t distance = 0;
   int16_t temperature = 0;
-  sensor_t sensor_data;
-  float aht20_hum = 0.0, aht20_temp = 100.0;
-  uint16_t pms1=0, pms25=0, pms10=0;
+  uint16_t voltage = 0;
   UTIL_TIMER_Time_t nextTxIn = 0;
 
   uint16_t humidity = 0;
-  uint32_t i = 0;
+  uint8_t i = 0;
 
-//  if (initAHT20())
-//  {
-//	  readAHT20(&aht20_hum, &aht20_temp);
-//  }
-
-  APP_LOG(TS_OFF, VLEVEL_M, "\r\n UART: NOW READ\r\n");
+  APP_LOG(TS_ON, VLEVEL_M, "\r\n UART: NOW READ\r\n");
 
   if (readUltraSonicDistance()) {
-	  APP_LOG(TS_ON, VLEVEL_M, "\r\n UART: read ok\r\n");
-	  pms1 = getLastReading();
+	  distance = getLastReading();
   } else {
+	  // Should send error message over LoRaWAN.
 	  APP_LOG(TS_OFF, VLEVEL_M, "\r\n UART: read failed\r\n");
-	  pms1 = getLastReading();
-	  pms25 = 0;
-	  pms10 = 0;
   }
 
-  EnvSensors_Read(&sensor_data);
-  temperature = (SYS_GetTemperatureLevel() >> 8);
-  pressure    = (uint16_t)(sensor_data.pressure * 100 / 10);      /* in hPa / 10 */
+  temperature = SYS_GetTemperatureLevel();
+  // Recover 2 byte representation.
+  temperature >>= 8;
+  voltage = SYS_GetBatteryLevel();
 
   AppData.Port = LORAWAN_USER_APP_PORT;
-  humidity    = (uint16_t)(sensor_data.humidity * 10);            /* in %*10     */
-
-  AppData.Buffer[i++] = AppLedStateOn;
-  AppData.Buffer[i++] = (uint8_t)((pressure >> 8) & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)(pressure & 0xFF);
+  // Split measurements into bytes and prepare buffer.
+  AppData.Buffer[i++] = (uint8_t)((distance >> 8) & 0xFF);
+  AppData.Buffer[i++] = (uint8_t)(distance & 0xFF);
+  AppData.Buffer[i++] = (uint8_t)((temperature >> 8) & 0xFF);
   AppData.Buffer[i++] = (uint8_t)(temperature & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)((humidity >> 8) & 0xFF);
-  AppData.Buffer[i++] = (uint8_t)(humidity & 0xFF);
-
-  AppData.Buffer[i++] = GetBatteryLevel();        /* 1 (very low) to 254 (fully charged) */
+  AppData.Buffer[i++] = (uint8_t)((voltage >> 8) & 0xFF);
+  AppData.Buffer[i++] = (uint8_t)(voltage & 0xFF);
 
   AppData.BufferSize = i;
 
-  if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAMAC_HANDLER_UNCONFIRMED_MSG, &nextTxIn, false))
+  if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAMAC_HANDLER_CONFIRMED_MSG, &nextTxIn, false))
   {
 	APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST\r\n");
   }
