@@ -309,8 +309,8 @@ bool readUltraSonicDistance()
 	UTIL_MEM_cpy_8(distance_chars, &buffer[SENSOR_MSG_LEN+1], 4 * sizeof(uint8_t) );
 	// Convert distance string to unsigned long, decimal base.
 	distance = strtoul(distance_chars, NULL, 10);
-	memset(distance_chars, 0, DISTANCE_CHARS_LEN);
-	memset(buffer, 0, SENSOR_BUFFER_LEN);
+	bzero(distance_chars, DISTANCE_CHARS_LEN);
+	bzero(buffer, SENSOR_BUFFER_LEN);
 	APP_LOG(TS_OFF, VLEVEL_M, "\r\nDistance: %d\r\n", distance);
 	return true;
 }

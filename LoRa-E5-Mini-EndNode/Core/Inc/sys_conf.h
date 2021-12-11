@@ -48,12 +48,12 @@ extern "C" {
 /**
   * @brief  Verbose level for all trace logs
   */
-#define VERBOSE_LEVEL               VLEVEL_M
+#define VERBOSE_LEVEL               VLEVEL_OFF
 
 /**
   * @brief Enable trace logs
   */
-#define APP_LOG_ENABLED             1
+#define APP_LOG_ENABLED             0
 
 /**
   * @brief Enable MCU Debugger pins (dbg serial wires, sbg spi, etc)
