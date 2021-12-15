@@ -94,10 +94,10 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUT1_GPIO_Port, &GPIO_InitStruct);
 
+  /* USER CODE BEGIN 2 */
+  /* USER CODE END 2 */
 }
 
-/* USER CODE BEGIN 2 */
 
-/* USER CODE END 2 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

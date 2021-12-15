@@ -241,7 +241,7 @@ void LoRaWAN_Init(void)
 	#elif !defined (STATUS_LED_ENABLE)
 	#error STATUS_LED_ENABLE not defined
 	#endif /* STATUS_LED_ENABLE */
-
+  SYS_LED_DeInit(SYS_LED2);
 
   /* Get LoRa APP version*/
   APP_LOG(TS_OFF, VLEVEL_M, "APP_VERSION:        V%X.%X.%X\r\n",
@@ -292,7 +292,7 @@ void LoRaWAN_Init(void)
 
 #if defined (STATUS_LED_ENABLE) && (STATUS_LED_ENABLE == 1)
 	  /* Enable join status LED */
-  	  UTIL_TIMER_Start(&JoinLedTimer);
+  	  //UTIL_TIMER_Start(&JoinLedTimer);
   #elif !defined (STATUS_LED_ENABLE)
   #error STATUS_LED_ENABLE not defined
   #endif /* STATUS_LED_ENABLE */
@@ -365,8 +365,8 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
   {
 	#if defined (STATUS_LED_ENABLE) && (STATUS_LED_ENABLE == 1)
 	  /* Enable Rx status LED */
-	  SYS_LED_On(SYS_LED_BLUE);
-	  UTIL_TIMER_Start(&RxLedTimer);
+	  //SYS_LED_On(SYS_LED_BLUE);
+	  //UTIL_TIMER_Start(&RxLedTimer);
 	#elif !defined (STATUS_LED_ENABLE)
 	#error STATUS_LED_ENABLE not defined
 	#endif /* STATUS_LED_ENABLE */
@@ -510,7 +510,7 @@ static void OnTxTimerEvent(void *context)
 static void OnTxTimerLedEvent(void *context)
 {
 #if defined(USE_BSP_DRIVER)
-  BSP_LED_Off(LED_GREEN) ;
+  //BSP_LED_Off(LED_GREEN) ;
 #else
   // SYS_LED_Off(SYS_LED_GREEN) ;
 #endif
@@ -519,16 +519,16 @@ static void OnTxTimerLedEvent(void *context)
 static void OnRxTimerLedEvent(void *context)
 {
 #if defined(USE_BSP_DRIVER)
-  BSP_LED_Off(LED_BLUE) ;
+  //BSP_LED_Off(LED_BLUE) ;
 #else
-  SYS_LED_Off(SYS_LED_BLUE) ;
+  //SYS_LED_Off(SYS_LED_BLUE) ;
 #endif
 }
 
 static void OnJoinTimerLedEvent(void *context)
 {
 #if defined(USE_BSP_DRIVER)
-  BSP_LED_Toggle(LED_RED) ;
+  //BSP_LED_Toggle(LED_RED) ;
 #else
   //SYS_LED_Toggle(SYS_LED_RED) ;
 #endif
@@ -555,7 +555,7 @@ static void OnJoinRequest(LmHandlerJoinParams_t *joinParams)
 	  UTIL_TIMER_Stop(&JoinLedTimer);
 
 #if defined(USE_BSP_DRIVER)
-	  BSP_LED_Off(LED_RED) ;
+	  //BSP_LED_Off(LED_RED) ;
 #elif defined(MX_BOARD_PSEUDODRIVER)
 	  // SYS_LED_Off(SYS_LED_RED) ;
 #endif /* USE_BSP_DRIVER || MX_BOARD_PSEUDODRIVER */
