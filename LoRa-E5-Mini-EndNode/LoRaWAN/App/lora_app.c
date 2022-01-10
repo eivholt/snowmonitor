@@ -208,6 +208,12 @@ static LmHandlerAppData_t AppData = { 0, 0, AppDataBuffer };
 static uint8_t AppLedStateOn = RESET;
 
 /**
+  * @brief Specifies the number of minutes TX interval
+  */
+static uint16_t AppTxIntervalMinutes = 0;
+
+
+/**
   * @brief Timer to handle the application Tx Led to toggle
   */
 static UTIL_TIMER_Object_t TxLedTimer;
@@ -420,17 +426,16 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 		}
 		break;
 	  case LORAWAN_USER_APP_PORT:
-		if (appData->BufferSize == 1)
+		if (appData->BufferSize == 2)
 		{
-		  AppLedStateOn = appData->Buffer[0] & 0x01;
-		  if (AppLedStateOn == RESET)
-		  {
-			APP_LOG(TS_OFF, VLEVEL_H,   "LED OFF\r\n");
-		  }
-		  else
-		  {
-			APP_LOG(TS_OFF, VLEVEL_H, "LED ON\r\n");
-		  }
+			uint16_t configValue = appData->Buffer[1] | (appData->Buffer[0] << 8);
+			APP_LOG(TS_OFF, VLEVEL_M, "Config Tx interval minutes:%u\r\n", (unsigned int)configValue);
+			if(configValue > 0)
+			{
+				AppTxIntervalMinutes = configValue;
+				UTIL_TIMER_SetPeriod(&TxTimer,  AppTxIntervalMinutes * 60 * 1000);
+				UTIL_TIMER_Start(&TxTimer);
+			}
 		}
 		break;
 	  default:
@@ -477,13 +482,13 @@ static void SendTxData(void)
 
   AppData.BufferSize = bufferIndex;
 
-  if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAMAC_HANDLER_CONFIRMED_MSG, &nextTxIn, false))
+  if (LORAMAC_HANDLER_SUCCESS == LmHandlerSend(&AppData, LORAMAC_HANDLER_UNCONFIRMED_MSG, &nextTxIn, false))
   {
 	APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST\r\n");
   }
   else if (nextTxIn > 0)
   {
-	APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d second(s)\r\n", (nextTxIn / 1000));
+	APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%d minutes(s)\r\n", (nextTxIn / 60 / 1000));
   }
 
   /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
